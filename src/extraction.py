@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import glob
 import pandas as pd
+import os
 
 
 def get_signal(path, fs=10000):
@@ -76,7 +77,7 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
     """
     filenames = glob.glob(path_data)
 
-    df = pd.DataFrame(columns=["file", "f0", "form1", "form2", "form3", "form4", "sex"])
+    df = pd.DataFrame(columns=["vowel", "sex", "f0", "form1", "form2", "form3", "form4"])
 
     for fname in filenames:
 
@@ -85,13 +86,13 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
         f0 = get_base_freq(input, fs)
         formants = get_formants(input, fs)
 
-        df = df.append({"file": fname,
+        df = df.append({'vowel': os.path.basename(fname)[2],
+                        "sex": 1 if 'f' in fname else 0,
                         "f0": f0,
                         "form1": formants[0],
                         "form2": formants[1],
                         "form3": formants[2],
-                        "form4": formants[3],
-                        "sex": 1 if 'Ola' in fname else 0}, ignore_index=True)
+                        "form4": formants[3]}, ignore_index=True)
     df.to_csv(path_csv)
     return df
 
