@@ -71,4 +71,5 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
                         "form4": formants[3],
                         "sex": 1 if 'Ola' in fname else 0}, ignore_index=True)
     df.to_csv(path_csv)
+    return df
 
