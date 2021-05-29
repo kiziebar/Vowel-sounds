@@ -6,12 +6,26 @@ import pandas as pd
 
 
 def get_signal(path, fs=10000):
+    """ Funkcja wczytująca sygnał zmonofonizowany z zadanej ścieżki.
+
+    :param path: Ścieżka w postaci napisu
+    :param fs: Częstotliwość w której chcemy odczytać sygnał
+    :return: Sygnał zmonofonizowany oraz częstotliwość (Tupla)
+    """
     signal_fm, sr = librosa.load(path, mono=True, sr=fs)
     signal_fm = signal_fm.astype('float32')
     return signal_fm, sr
 
 
-def draw_spectogram(ax, fig, signal_fm, title):
+def draw_spectrogram(ax, fig, signal_fm, title):
+    """ Funkcja tworząca wykres spektrogramu.
+
+    :param ax: Okno figury (matplotlib.axis)
+    :param fig: Figura (matplotlib.figure)
+    :param signal_fm: Sygnał w postaci zmonofonizowanej (jeden kanał)
+    :param title: Podpis okna (matplotlib.title)
+    :return: Sygnał [dB]
+    """
     D = librosa.stft(signal_fm)
     S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
     img = librosa.display.specshow(S_db, x_axis='time', y_axis='linear', ax=ax, cmap='binary_r')
@@ -21,6 +35,12 @@ def draw_spectogram(ax, fig, signal_fm, title):
 
 
 def get_base_freq(signal_fm, fs):
+    """ Funkcja wydobywająca bazową częstotliwość z sygnału podanego jako argument.
+
+    :param signal_fm: Sygnał w postaci zmonofonizowanej (jeden kanał)
+    :param fs: Częstotliwość sygnału
+    :return: Częstotliwość podstawowa
+    """
     corr = signal.correlate(signal_fm, signal_fm, mode='full')
     corr = corr[int(corr.size / 2):]
     peaks, _ = signal.find_peaks(corr, height=0)
@@ -29,29 +49,31 @@ def get_base_freq(signal_fm, fs):
 
 
 def get_formants(signal_fm, fs):
+    """ Funkcja uzyskująca formanty z sygnału.
+
+    :param signal_fm: Sygnał w postaci zmonofonizowanej (jeden kanał)
+    :param fs: Częstotliwość sygnału
+    :return: Formanty (Tupla)
+    """
     N = len(signal_fm)
     w = np.hamming(N)
-
-    # Okno i filtr górnoprzepustowy.
     s1 = signal_fm * w
     s1 = signal.lfilter([1], [1., 0.63], s1)
-
-    # Filtr LPC.
     ncoeff = 2 + fs / 1000
     A = librosa.core.lpc(s1, int(ncoeff))
-
-    # Pierwiastki.
     rts = np.roots(A)
     rts = [r for r in rts if np.imag(r) >= 0]
-
-    # Kąty.
     angz = np.arctan2(np.imag(rts), np.real(rts))
-
-    # Częstotliwości formantów.
     return sorted(angz * (fs / (2 * 3.14)))
 
 
 def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/src/vowels_dataset/*", path_csv="data.csv"):
+    """ Funkcja pozyskująca cechy z próbek dźwiękowych do ramki danych (Pandas).
+
+    :param path_data: Ścieżka do plików dźwiękowych (glob)
+    :param path_csv: Ścieżka do zapisu ramki danych z rozszerzeniem .csv
+    :return: Ramka danych (pandas.DataFrame)
+    """
     filenames = glob.glob(path_data)
 
     df = pd.DataFrame(columns=["file", "f0", "form1", "form2", "form3", "form4", "sex"])
