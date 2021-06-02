@@ -23,9 +23,10 @@ def get_envelope(signal_r, range_value=5000):
 
     :param signal_r: Sygnał w postaci zmonofonizowanej (jeden kanał)
     :param range_value: Krok w obwiedni
-    :return: Indeksy obwiedni górnej oraz dolnej, a także wartości obwiedni
+    :return: Indeksy obwiedni, a także wartości obwiedni (tupla)
     """
     max_values = []
+    mean_values = []
     min_values = []
     ind_max = []
     ind_min = []
@@ -39,8 +40,9 @@ def get_envelope(signal_r, range_value=5000):
 
         max_values.append(np.max(signal_r[i: i + range_value]))
         min_values.append(np.min(signal_r[i: i + range_value]))
+        mean_values.append(np.mean(signal_r[i: i + range_value]))
 
-    return ind_max, ind_min, max_values, min_values
+    return ind_max, ind_min, max_values, min_values, mean_values
 
 
 def draw_spectrogram(ax, fig, signal_fm, title):
