@@ -18,6 +18,31 @@ def get_signal(path, fs=10000):
     return signal_fm, sr
 
 
+def get_envelope(signal_r, range_value=5000):
+    """ Funkcja obliczająca obwiednię dla zadanego sygnału.
+
+    :param signal_r: Sygnał w postaci zmonofonizowanej (jeden kanał)
+    :param range_value: Krok w obwiedni
+    :return: Indeksy obwiedni górnej oraz dolnej, a także wartości obwiedni
+    """
+    max_values = []
+    min_values = []
+    ind_max = []
+    ind_min = []
+
+    for i in range(0, len(signal_r), range_value):
+        inx_max = np.argmax(signal_r[i: i + range_value])
+        ind_max.append(inx_max + i)
+
+        inx_min = np.argmin(signal_r[i: i + range_value])
+        ind_min.append(inx_min + i)
+
+        max_values.append(np.max(signal_r[i: i + range_value]))
+        min_values.append(np.min(signal_r[i: i + range_value]))
+
+    return ind_max, ind_min, max_values, min_values
+
+
 def draw_spectrogram(ax, fig, signal_fm, title):
     """ Funkcja tworząca wykres spektrogramu.
 
