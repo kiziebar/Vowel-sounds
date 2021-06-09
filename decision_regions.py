@@ -16,7 +16,7 @@ def plot_decision_regions1d(X, y, classifier):
     x1_min, x1_max = X.min() - 1, X.max() + 1
 
     #xx1 = np.linspace(x1_min, x1_max, len(X))
-    xx1 = np.arange(x1_min, x1_max, 0.01)
+    xx1 = np.arange(x1_min, x1_max, 0.1)
     xx1=xx1.reshape(-1,1)
     Z=classifier.predict(xx1)
     plt.plot(xx1,Z)
