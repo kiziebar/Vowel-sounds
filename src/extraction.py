@@ -1,9 +1,11 @@
 from scipy import signal
+import sklearn
 import numpy as np
 import librosa
 import glob
 import pandas as pd
 import os
+import antropy as ant
 
 
 def get_signal(path, fs=10000):
@@ -95,6 +97,17 @@ def get_formants(signal_fm, fs):
     return sorted(angz * (fs / (2 * 3.14)))
 
 
+def get_spectral_centroids(signal_fm, fs):
+    """ Funkcja pozyskująca centroid z widma - średnia ważona częstotliwości.
+
+    :param signal_fm: Sygnał w postaci zmonofonizowanej (jeden kanał)
+    :param fs: Częstotliwość sygnału
+    :return: Znormalizowany centroid
+    """
+    spectral_centroids = librosa.feature.spectral_centroid(signal_fm, sr=fs)[0]
+    return sklearn.preprocessing.minmax_scale(spectral_centroids, axis=0)
+
+
 def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/src/vowels_dataset/*", path_csv="data.csv"):
     """ Funkcja pozyskująca cechy z próbek dźwiękowych do ramki danych (Pandas).
 
@@ -104,7 +117,8 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
     """
     filenames = glob.glob(path_data)
 
-    df = pd.DataFrame(columns=["vowel", "sex", "f0", "form1", "form2", "form3", "form4"])
+    df = pd.DataFrame(columns=["vowel", "sex", "f0", "form1", "form2", "form3", "form4", "spc1", "spc2", "spc3",
+                               "entrspc"])
 
     for fname in filenames:
 
@@ -112,6 +126,8 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
 
         f0 = get_base_freq(input, fs)
         formants = get_formants(input, fs)
+        spc = get_spectral_centroids(input, fs)
+        spcent = ant.spectral_entropy(input, sf=fs, method='welch')
 
         df = df.append({'vowel': os.path.basename(fname)[2],
                         "sex": 1 if 'f' in fname else 0,
@@ -119,7 +135,11 @@ def create_database(path_data="C:/Users/kb39309/Documents/Studia/Vovel_sounds/sr
                         "form1": formants[0],
                         "form2": formants[1],
                         "form3": formants[2],
-                        "form4": formants[3]}, ignore_index=True)
+                        "form4": formants[3],
+                        "spc1": spc[0],
+                        "spc2": spc[1],
+                        "spc3": spc[2],
+                        "entrspc": spcent}, ignore_index=True)
     df.to_csv(path_csv)
     return df
 
