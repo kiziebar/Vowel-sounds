@@ -3,7 +3,7 @@ ___
 Projekt na temat klasyfikacji samogłosek oraz płci na podstawie wybranych cech. 
 ___
 
-##Ekstrakcja cech
+## Ekstrakcja cech
 
 Ekstrakcja cech została wykonana na podstawie próbek głosowych znajdujących się w 
 folderze *src/vowels_dataset*. W celu łatwiejszego poruszania się po plikach, 
